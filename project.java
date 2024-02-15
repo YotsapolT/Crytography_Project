@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Random;
 import java.util.Scanner;
 
 public class project {
@@ -10,14 +11,14 @@ public class project {
         in.nextLine();
         System.out.print("Enter file path(don't forget to escape backslash): ");
         String filePath = in.nextLine();
-        String ans = getBinaryFromfile(n, filePath);
-        System.out.println(ans);
+        String ans = GenPrime(n, filePath);
+        System.out.println("output bit: " + ans);
         System.out.println("to int: " + Integer.parseInt(ans, 2));
-        System.out.println("isPrime: " + String.valueOf(isPrime(Integer.parseInt(ans, 2))));
+        System.out.println("isPrime: " + isPrime(Integer.parseInt(ans, 2)));
         in.close();
     }
 
-    public static String getBinaryFromfile(int n, String filename) {
+    public static String GenPrime(int n, String filename) {
         File file = new File(filename);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -38,14 +39,43 @@ public class project {
             return "The number of bits is more than binary input file.";
         } else {
             for (int i = 0; i < content.length(); i++) {
-                if (content.charAt(i) == '1') {
+                if (content.charAt(i) == '1') { // start binary with '1'
                     biFromFile = content.substring(i, i + n);
                     break;
                 }
             }
         }
 
-        return biFromFile;
+        System.out.println("original bits: " + biFromFile);
+        int decimal = Integer.parseInt(biFromFile, 2);
+        if (old_isPrime(decimal)) {
+            System.out.println("original bits is Prime");
+            return biFromFile;
+        } else {
+            while (!old_isPrime(decimal)) {
+                if ((decimal % 2) == 0) {
+                    if (decimal + 1 < Math.pow(2, n) && decimal + 1 > 0) {
+                        decimal += 1;
+                    } else {
+                        System.out.println("reach maximum bits. There's no prime");
+                        break;
+                    }
+                } else {
+                    if (decimal + 2 < Math.pow(2, n) && decimal + 2 > 0) {
+                        decimal += 2;
+                        if (decimal % 5 == 0) {
+                            decimal += 2;
+                        }
+                    } else {
+                        System.out.println("reach maximum bits, there's no prime");
+                        break;
+                    }
+                }
+            }
+            biFromFile = Integer.toBinaryString(decimal);
+            System.out.println("original bits is not Prime");
+            return biFromFile;
+        }
     }
 
     public static String ByteToBits(byte b) {
@@ -66,24 +96,108 @@ public class project {
     }
 
     public static boolean isPrime(int n) {
+        if (LehmannTest(n)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static boolean old_isPrime(int n) {
+
         if (n <= 1)
             return false;
+
         if (n == 2 || n == 3)
             return true;
+
         if (n % 2 == 0 || n % 3 == 0)
             return false;
+
         for (int i = 5; i <= Math.sqrt(n); i = i + 6)
             if (n % i == 0 || n % (i + 2) == 0)
                 return false;
+
         return true;
     }
 
-    public static int gcd(int a, int b) {
-        while (b != 0) {
-            int t = b;
-            b = a % b;
+    public static boolean LehmannTest(int n) {
+        if ((n % 2) == 0 || n == 0 || n == 1) {
+            return false;
+        }
+
+        Random rand = new Random();
+        int a = rand.nextInt(n - 3) + 2;
+
+        int e = (n - 1) / 2;
+        int round = 100;
+
+        while (round > 0) {
+            // System.out.println("a: " + a + " e: " + e + " n: " + n);
+            int result = FastExpo(a, e, n);
+            if ((result % n) == 1 || (result % n) == (n - 1)) {
+                a = rand.nextInt(n - 3) + 2;
+                round -= 1;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static int GCD(int a, int n) { // Euclidean's algorithm
+        while (n != 0) {
+            int t = n;
+            n = a % n;
             a = t;
         }
         return a;
+    }
+
+    public static int[] extendedGCD(int a, int b) { // Extended Euclidean's algorithm
+        if (a == 0) {
+            return new int[] { b, 0, 1 };
+        }
+
+        int[] result = extendedGCD(b % a, a);
+        int gcd = result[0];
+        int x1 = result[1];
+        int y1 = result[2];
+
+        int inv_a = y1 - (b / a) * x1;
+        int inv_b = x1;
+
+        return new int[] { gcd, inv_a, inv_b };
+    }
+
+    public static int FindInverse(int a, int n) {
+        int[] result = extendedGCD(a, n);
+        int inv_a = result[1];
+        if (inv_a < 0) { // java '%' operator is Remainder operator. Remainder ⊆ I but Mod ⊆ I+
+            inv_a = ((inv_a % n) + n) % n;
+        }
+        return inv_a;
+    }
+
+    public static int FastExpo(int a, int e, int n) {
+        String bi_e = Integer.toBinaryString(e);
+        int[] preCompute = new int[bi_e.length()];
+        int result = 1;
+        for (int i = preCompute.length - 1; i >= 0; i--) {
+            if (i == preCompute.length - 1) {
+                preCompute[i] = a % n;
+            } else {
+                preCompute[i] = (preCompute[i + 1] * preCompute[i + 1]) % n;
+            }
+        }
+        for (int i = 0; i < bi_e.length(); i++) {
+            if (bi_e.charAt(i) == '1') {
+                result *= preCompute[i];
+                if (result > n) {
+                    result = result % n;
+                }
+            }
+        }
+        return result;
     }
 }
