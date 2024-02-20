@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -200,5 +201,18 @@ public class project {
             }
         }
         return result;
+    }
+
+    public static int[] GenRandomNowithInverse(int n){
+        SecureRandom random = new SecureRandom();
+        int e;
+        while(true){
+            e = random.nextInt();
+            if (GCD(e, n) == 1) {
+                break;
+            }
+        }
+        int inv_e = FindInverse(e, n);
+        return new int[] {e, inv_e, n};
     }
 }

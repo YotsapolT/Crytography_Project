@@ -1,10 +1,10 @@
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(LehmannTest(2));
+        System.out.println(Arrays.toString(GenRandomNowithInverse(148169422)));
     }
 
     public static boolean isPrime(int n) {
@@ -82,4 +82,50 @@ public class test {
         return true;
     }
 
+    public static int GCD(int a, int n) { // Euclidean's algorithm1
+        while (n != 0) {
+            int t = n;
+            n = a % n;
+            a = t;
+        }
+        return a;
+    }
+
+    public static int[] extendedGCD(int a, int b) { // Extended Euclidean's algorithm
+        if (a == 0) {
+            return new int[] { b, 0, 1 };
+        }
+
+        int[] result = extendedGCD(b % a, a);
+        int gcd = result[0];
+        int x1 = result[1];
+        int y1 = result[2];
+
+        int inv_a = y1 - (b / a) * x1;
+        int inv_b = x1;
+
+        return new int[] { gcd, inv_a, inv_b };
+    }
+
+    public static int FindInverse(int a, int n) {
+        int[] result = extendedGCD(a, n);
+        int inv_a = result[1];
+        if (inv_a < 0) { // java '%' operator is Remainder operator. Remainder ⊆ I but Mod ⊆ I+
+            inv_a = ((inv_a % n) + n) % n;
+        }
+        return inv_a;
+    }
+
+    public static int[] GenRandomNowithInverse(int n){
+        SecureRandom random = new SecureRandom();
+        int e;
+        while(true){
+            e = random.nextInt();
+            if (GCD(e, n) == 1) {
+                break;
+            }
+        }
+        int inv_e = FindInverse(e, n);
+        return new int[] {e, inv_e, n};
+    }
 }
