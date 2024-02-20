@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -14,9 +15,11 @@ public class project {
         String filePath = in.nextLine();
         String ans = GenPrime(n, filePath);
         System.out.println("output bit: " + ans);
-        System.out.println("to int: " + Integer.parseInt(ans, 2));
-        System.out.println("isPrime: " + isPrime(Integer.parseInt(ans, 2)));
+        System.out.println("to int: " + Long.parseLong(ans, 2));
+        System.out.println("isPrime: " + isPrime(Long.parseLong(ans, 2)));
         in.close();
+
+        System.out.println(Arrays.toString(GenRandomNowithInverse(Long.parseLong(ans, 2))));
     }
 
     public static String GenPrime(int n, String filename) {
@@ -48,32 +51,30 @@ public class project {
         }
 
         System.out.println("original bits: " + biFromFile);
-        int decimal = Integer.parseInt(biFromFile, 2);
-        if (old_isPrime(decimal)) {
+        System.out.println("original decimal: " + Long.parseLong(biFromFile, 2));
+        long decimal = Long.parseLong(biFromFile, 2);
+        if (isPrime(decimal)) {
             System.out.println("original bits is Prime");
             return biFromFile;
         } else {
-            while (!old_isPrime(decimal)) {
+            while (!isPrime(decimal)) {
                 if ((decimal % 2) == 0) {
-                    if (decimal + 1 < Math.pow(2, n) && decimal + 1 > 0) {
+                    if (decimal + 1 < FastExpo(2, n, Long.MAX_VALUE) && decimal + 1 > 0) {
                         decimal += 1;
                     } else {
                         System.out.println("reach maximum bits. There's no prime");
                         break;
                     }
                 } else {
-                    if (decimal + 2 < Math.pow(2, n) && decimal + 2 > 0) {
+                    if (decimal + 2 < FastExpo(2, n, Long.MAX_VALUE) && decimal + 2 > 0) {
                         decimal += 2;
-                        if (decimal % 5 == 0) {
-                            decimal += 2;
-                        }
                     } else {
                         System.out.println("reach maximum bits, there's no prime");
                         break;
                     }
                 }
             }
-            biFromFile = Integer.toBinaryString(decimal);
+            biFromFile = Long.toBinaryString(decimal);
             System.out.println("original bits is not Prime");
             return biFromFile;
         }
@@ -96,7 +97,7 @@ public class project {
         return result;
     }
 
-    public static boolean isPrime(int n) {
+    public static boolean isPrime(long n) {
         if (LehmannTest(n)) {
             return true;
         } else {
@@ -122,7 +123,7 @@ public class project {
         return true;
     }
 
-    public static boolean LehmannTest(int n) {
+    public static boolean LehmannTest(long n) {
         if (n == 2 || n == 3) {
             return true;
         } else if ((n % 2) == 0 || n == 0 || n == 1){
@@ -130,15 +131,15 @@ public class project {
         }
 
         Random rand = new Random();
-        int a = rand.nextInt(n - 3) + 2;
+        long a = rand.nextLong(n - 3) + 2;
 
-        int e = (n - 1) / 2;
+        long e = (n - 1) / 2;
         int round = 100;
 
         while (round > 0) {
-            int result = FastExpo(a, e, n);
+            long result = FastExpo(a, e, n);
             if ((result % n) == 1 || (result % n) == (n - 1)) {
-                a = rand.nextInt(n - 3) + 2;
+                a = rand.nextLong(n - 3) + 2;
                 round -= 1;
             } else {
                 return false;
@@ -147,44 +148,44 @@ public class project {
         return true;
     }
 
-    public static int GCD(int a, int n) { // Euclidean's algorithm1
+    public static long GCD(long a, long n) { // Euclidean's algorithm1
         while (n != 0) {
-            int t = n;
+            long t = n;
             n = a % n;
             a = t;
         }
         return a;
     }
 
-    public static int[] extendedGCD(int a, int b) { // Extended Euclidean's algorithm
+    public static long[] extendedGCD(long a, long b) { // Extended Euclidean's algorithm
         if (a == 0) {
-            return new int[] { b, 0, 1 };
+            return new long[] { b, 0, 1 };
         }
 
-        int[] result = extendedGCD(b % a, a);
-        int gcd = result[0];
-        int x1 = result[1];
-        int y1 = result[2];
+        long[] result = extendedGCD(b % a, a);
+        long gcd = result[0];
+        long x1 = result[1];
+        long y1 = result[2];
 
-        int inv_a = y1 - (b / a) * x1;
-        int inv_b = x1;
+        long inv_a = y1 - (b / a) * x1;
+        long inv_b = x1;
 
-        return new int[] { gcd, inv_a, inv_b };
+        return new long[] { gcd, inv_a, inv_b };
     }
 
-    public static int FindInverse(int a, int n) {
-        int[] result = extendedGCD(a, n);
-        int inv_a = result[1];
+    public static long FindInverse(long a, long n) {
+        long[] result = extendedGCD(a, n);
+        long inv_a = result[1];
         if (inv_a < 0) { // java '%' operator is Remainder operator. Remainder ⊆ I but Mod ⊆ I+
             inv_a = ((inv_a % n) + n) % n;
         }
         return inv_a;
     }
 
-    public static int FastExpo(int a, int e, int n) {
-        String bi_e = Integer.toBinaryString(e);
-        int[] preCompute = new int[bi_e.length()];
-        int result = 1;
+    public static long FastExpo(long a, long e, long n) {
+        String bi_e = Long.toBinaryString(e);
+        long[] preCompute = new long[bi_e.length()];
+        long result = 1;
         for (int i = preCompute.length - 1; i >= 0; i--) {
             if (i == preCompute.length - 1) {
                 preCompute[i] = a % n;
@@ -203,16 +204,16 @@ public class project {
         return result;
     }
 
-    public static int[] GenRandomNowithInverse(int n){
+    public static long[] GenRandomNowithInverse(long n){
         SecureRandom random = new SecureRandom();
-        int e;
+        long e;
         while(true){
-            e = random.nextInt();
+            e = random.nextLong(n);
             if (GCD(e, n) == 1) {
                 break;
             }
         }
-        int inv_e = FindInverse(e, n);
-        return new int[] {e, inv_e, n};
+        long inv_e = FindInverse(e, n);
+        return new long[] {e, inv_e, n};
     }
 }
