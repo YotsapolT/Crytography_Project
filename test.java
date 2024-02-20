@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class test {
     public static void main(String[] args) {
-        System.out.println(old_isPrime(1073741823));
+        System.out.println(LehmannTest(2));
     }
 
     public static boolean isPrime(int n) {
@@ -16,7 +16,9 @@ public class test {
     }
 
     public static boolean LehmannTest(int n) {
-        if ((n % 2) == 0 || n == 0 || n == 1) {
+        if (n == 2 || n == 3) {
+            return true;
+        } else if ((n % 2) == 0 || n == 0 || n == 1){
             return false;
         }
 

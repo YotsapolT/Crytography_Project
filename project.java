@@ -122,7 +122,9 @@ public class project {
     }
 
     public static boolean LehmannTest(int n) {
-        if ((n % 2) == 0 || n == 0 || n == 1) {
+        if (n == 2 || n == 3) {
+            return true;
+        } else if ((n % 2) == 0 || n == 0 || n == 1){
             return false;
         }
 
@@ -133,7 +135,6 @@ public class project {
         int round = 100;
 
         while (round > 0) {
-            // System.out.println("a: " + a + " e: " + e + " n: " + n);
             int result = FastExpo(a, e, n);
             if ((result % n) == 1 || (result % n) == (n - 1)) {
                 a = rand.nextInt(n - 3) + 2;
@@ -145,7 +146,7 @@ public class project {
         return true;
     }
 
-    public static int GCD(int a, int n) { // Euclidean's algorithm
+    public static int GCD(int a, int n) { // Euclidean's algorithm1
         while (n != 0) {
             int t = n;
             n = a % n;
