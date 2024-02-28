@@ -1,11 +1,12 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
-public class project_noBigInt {
+public class project_1_BigInt {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         System.out.print("Enter number of bits: ");
@@ -15,11 +16,11 @@ public class project_noBigInt {
         String filePath = in.nextLine();
         String ans = GenPrime(n, filePath);
         System.out.println("output bit: " + ans);
-        System.out.println("to int: " + Long.parseLong(ans, 2));
-        System.out.println("isPrime: " + isPrime(Long.parseLong(ans, 2)));
+        System.out.println("to int: " + new BigInteger(ans, 2));
+        System.out.println("isPrime: " + isPrime(new BigInteger(ans, 2)));
         in.close();
 
-        System.out.println(Arrays.toString(GenRandomNowithInverse(Long.parseLong(ans, 2))));
+        System.out.println(Arrays.toString(GenRandomNowithInverse(new BigInteger(ans, 2))));
     }
 
     public static String GenPrime(int n, String filename) {
@@ -51,30 +52,40 @@ public class project_noBigInt {
         }
 
         System.out.println("original bits: " + biFromFile);
-        System.out.println("original decimal: " + Long.parseLong(biFromFile, 2));
-        long decimal = Long.parseLong(biFromFile, 2);
+        System.out.println("original decimal: " + new BigInteger(biFromFile, 2));
+        BigInteger decimal = new BigInteger(biFromFile, 2);
+
+        // calculate Upper bound
+        String upperBound_bi = "";
+        for (int i = 0; i < decimal.bitLength(); i++) {
+            upperBound_bi += "1";
+        }
+        BigInteger upperBound = new BigInteger(upperBound_bi, 2);
+
         if (isPrime(decimal)) {
             System.out.println("original bits is Prime");
             return biFromFile;
         } else {
             while (!isPrime(decimal)) {
-                if ((decimal % 2) == 0) {
-                    if (decimal + 1 < FastExpo(2, n, Long.MAX_VALUE) && decimal + 1 > 0) {
-                        decimal += 1;
+                if (decimal.mod(new BigInteger("2")).equals(new BigInteger("0"))) {
+                    if ((decimal.add(new BigInteger("1"))).compareTo(upperBound.add(new BigInteger("1"))) == -1
+                            && decimal.add(new BigInteger("1")).compareTo(new BigInteger("0")) == 1) {
+                        decimal = decimal.add(new BigInteger("1"));
                     } else {
                         System.out.println("reach maximum bits. There's no prime");
                         break;
                     }
                 } else {
-                    if (decimal + 2 < FastExpo(2, n, Long.MAX_VALUE) && decimal + 2 > 0) {
-                        decimal += 2;
+                    if ((decimal.add(new BigInteger("2"))).compareTo(upperBound.add(new BigInteger("1"))) == -1
+                            && decimal.add(new BigInteger("2")).compareTo(new BigInteger("0")) == 1) {
+                        decimal = decimal.add(new BigInteger("2"));
                     } else {
                         System.out.println("reach maximum bits, there's no prime");
                         break;
                     }
                 }
             }
-            biFromFile = Long.toBinaryString(decimal);
+            biFromFile = decimal.toString(2);
             System.out.println("original bits is not Prime");
             return biFromFile;
         }
@@ -97,7 +108,7 @@ public class project_noBigInt {
         return result;
     }
 
-    public static boolean isPrime(long n) {
+    public static boolean isPrime(BigInteger n) {
         if (LehmannTest(n)) {
             return true;
         } else {
@@ -123,19 +134,26 @@ public class project_noBigInt {
         return true;
     }
 
-    public static boolean LehmannTest(long n) {
-        if (n == 2 || n == 3) {
+    public static boolean LehmannTest(BigInteger n) {
+        if (n.equals(new BigInteger("2")) || n.equals(new BigInteger("3"))) {
             return true;
-        } else if ((n % 2) == 0 || n == 0 || n == 1) {
+        } else if ((n.mod(new BigInteger("2"))).equals(new BigInteger("0"))
+                || n.equals(new BigInteger("0")) || n.equals(new BigInteger("1"))) {
             return false;
         }
 
         Random rand = new Random();
-        long e = (n - 1) / 2;
+        BigInteger e = (n.subtract(new BigInteger("1"))).divide(new BigInteger("2"));
+
         for (int i = 0; i < 100; i++) {
-            long a = rand.nextLong(n - 3) + 2;
-            long result = FastExpo(a, e, n);
-            if ((result % n) == 1 || (result % n) == (n - 1)) {
+            BigInteger a = new BigInteger(n.bitLength(), rand);
+            if (a.equals(new BigInteger("0")) || a.equals(new BigInteger("1")) || a.compareTo(n) != -1) {
+                i--;
+                continue;
+            }
+            BigInteger result = FastExpo(a, e, n);
+            if ((result.mod(n)).equals(new BigInteger("1"))
+                    || (result.mod(n)).equals((n.subtract(new BigInteger("1"))))) {
                 continue;
             } else {
                 return false;
@@ -144,72 +162,72 @@ public class project_noBigInt {
         return true;
     }
 
-    public static long FastExpo(long a, long e, long n) {
-        String bi_e = Long.toBinaryString(e);
-        long[] preCompute = new long[bi_e.length()];
-        long result = 1;
+    public static BigInteger FastExpo(BigInteger a, BigInteger e, BigInteger n) {
+        String bi_e = e.toString(2);
+        BigInteger[] preCompute = new BigInteger[bi_e.length()];
+        BigInteger result = new BigInteger("1");
         for (int i = preCompute.length - 1; i >= 0; i--) {
             if (i == preCompute.length - 1) {
-                preCompute[i] = a % n;
+                preCompute[i] = a.mod(n);
             } else {
-                preCompute[i] = (preCompute[i + 1] * preCompute[i + 1]) % n;
+                preCompute[i] = (preCompute[i + 1].multiply(preCompute[i + 1])).mod(n);
             }
         }
         for (int i = 0; i < bi_e.length(); i++) {
             if (bi_e.charAt(i) == '1') {
-                result *= preCompute[i];
-                if (result > n) {
-                    result = result % n;
+                result = result.multiply(preCompute[i]);
+                if (result.compareTo(n) == 1) {
+                    result = result.mod(n);
                 }
             }
         }
         return result;
     }
 
-    public static long GCD(long a, long n) { // Euclidean's algorithm
-        while (n != 0) {
-            long t = n;
-            n = a % n;
+    public static BigInteger GCD(BigInteger a, BigInteger n) { // Euclidean's algorithm
+        while (!n.equals(new BigInteger("0"))) {
+            BigInteger t = n;
+            n = a.mod(n);
             a = t;
         }
         return a;
     }
 
-    public static long[] extendedGCD(long a, long b) { // Extended Euclidean's algorithm
-        if (a == 0) {
-            return new long[] { b, 0, 1 };
+    public static BigInteger[] extendedGCD(BigInteger a, BigInteger b) { // Extended Euclidean's algorithm
+        if (a.equals(new BigInteger("0"))) {
+            return new BigInteger[] { b, new BigInteger("0"), new BigInteger("1") };
         }
 
-        long[] result = extendedGCD(b % a, a);
-        long gcd = result[0];
-        long x1 = result[1];
-        long y1 = result[2];
+        BigInteger[] result = extendedGCD(b.mod(a), a);
+        BigInteger gcd = result[0];
+        BigInteger x1 = result[1];
+        BigInteger y1 = result[2];
 
-        long inv_a = y1 - (b / a) * x1;
-        long inv_b = x1;
+        BigInteger inv_a = y1.subtract(((b.divide(a))).multiply(x1));
+        BigInteger inv_b = x1;
 
-        return new long[] { gcd, inv_a, inv_b };
+        return new BigInteger[] { gcd, inv_a, inv_b };
     }
 
-    public static long FindInverse(long a, long n) {
-        long[] result = extendedGCD(a, n);
-        long inv_a = result[1];
-        if (inv_a < 0) { // java '%' operator is Remainder operator. Remainder ⊆ I but Mod ⊆ I+
-            inv_a = ((inv_a % n) + n) % n;
+    public static BigInteger FindInverse(BigInteger a, BigInteger n) {
+        BigInteger[] result = extendedGCD(a, n);
+        BigInteger inv_a = result[1];
+        if (inv_a.compareTo(new BigInteger("0")) == -1) { // java '%' operator is Remainder operator ⊆ I but Mod ⊆ I+
+            inv_a = ((inv_a.mod(n)).add(n)).mod(n);
         }
         return inv_a;
     }
 
-    public static long[] GenRandomNowithInverse(long n) {
+    public static BigInteger[] GenRandomNowithInverse(BigInteger n) {
         SecureRandom random = new SecureRandom();
-        long e;
+        BigInteger e;
         while (true) {
-            e = random.nextLong(n);
-            if (GCD(e, n) == 1) {
+            e = new BigInteger(n.bitLength(), random);
+            if (GCD(e, n).equals(new BigInteger("1"))) {
                 break;
             }
         }
-        long inv_e = FindInverse(e, n);
-        return new long[] { e, inv_e, n };
+        BigInteger inv_e = FindInverse(e, n);
+        return new BigInteger[] { e, inv_e, n };
     }
 }
