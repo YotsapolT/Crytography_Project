@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
-public class project {
+public class project_noBigInt {
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
         System.out.print("Enter number of bits: ");
@@ -126,21 +126,17 @@ public class project {
     public static boolean LehmannTest(long n) {
         if (n == 2 || n == 3) {
             return true;
-        } else if ((n % 2) == 0 || n == 0 || n == 1){
+        } else if ((n % 2) == 0 || n == 0 || n == 1) {
             return false;
         }
 
         Random rand = new Random();
-        long a = rand.nextLong(n - 3) + 2;
-
         long e = (n - 1) / 2;
-        int round = 100;
-
-        while (round > 0) {
+        for (int i = 0; i < 100; i++) {
+            long a = rand.nextLong(n - 3) + 2;
             long result = FastExpo(a, e, n);
             if ((result % n) == 1 || (result % n) == (n - 1)) {
-                a = rand.nextLong(n - 3) + 2;
-                round -= 1;
+                continue;
             } else {
                 return false;
             }
@@ -148,7 +144,29 @@ public class project {
         return true;
     }
 
-    public static long GCD(long a, long n) { // Euclidean's algorithm1
+    public static long FastExpo(long a, long e, long n) {
+        String bi_e = Long.toBinaryString(e);
+        long[] preCompute = new long[bi_e.length()];
+        long result = 1;
+        for (int i = preCompute.length - 1; i >= 0; i--) {
+            if (i == preCompute.length - 1) {
+                preCompute[i] = a % n;
+            } else {
+                preCompute[i] = (preCompute[i + 1] * preCompute[i + 1]) % n;
+            }
+        }
+        for (int i = 0; i < bi_e.length(); i++) {
+            if (bi_e.charAt(i) == '1') {
+                result *= preCompute[i];
+                if (result > n) {
+                    result = result % n;
+                }
+            }
+        }
+        return result;
+    }
+
+    public static long GCD(long a, long n) { // Euclidean's algorithm
         while (n != 0) {
             long t = n;
             n = a % n;
@@ -182,38 +200,16 @@ public class project {
         return inv_a;
     }
 
-    public static long FastExpo(long a, long e, long n) {
-        String bi_e = Long.toBinaryString(e);
-        long[] preCompute = new long[bi_e.length()];
-        long result = 1;
-        for (int i = preCompute.length - 1; i >= 0; i--) {
-            if (i == preCompute.length - 1) {
-                preCompute[i] = a % n;
-            } else {
-                preCompute[i] = (preCompute[i + 1] * preCompute[i + 1]) % n;
-            }
-        }
-        for (int i = 0; i < bi_e.length(); i++) {
-            if (bi_e.charAt(i) == '1') {
-                result *= preCompute[i];
-                if (result > n) {
-                    result = result % n;
-                }
-            }
-        }
-        return result;
-    }
-
-    public static long[] GenRandomNowithInverse(long n){
+    public static long[] GenRandomNowithInverse(long n) {
         SecureRandom random = new SecureRandom();
         long e;
-        while(true){
+        while (true) {
             e = random.nextLong(n);
             if (GCD(e, n) == 1) {
                 break;
             }
         }
         long inv_e = FindInverse(e, n);
-        return new long[] {e, inv_e, n};
+        return new long[] { e, inv_e, n };
     }
 }
