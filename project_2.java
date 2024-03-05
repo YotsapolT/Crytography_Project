@@ -78,13 +78,13 @@ public class project_2 {
         return ElgamalKey;
     }
 
-    public static String ElgamalEncrypt(BigInteger p, BigInteger g, BigInteger y, String plaintext) {
+    public static void ElgamalEncrypt(BigInteger p, BigInteger g, BigInteger y, String plaintext) {
         char[] char_arr_p = plaintext.toCharArray();
         SecureRandom rand = new SecureRandom();
-        String ciphertext = "";
+        byte[] ciphertext = new byte[p.toByteArray().length * 2 * char_arr_p.length];
         for (int i = 0; i < char_arr_p.length; i++) {
-            String c_a = "";
-            String c_b = "";
+            byte[] cipher_a = new byte[p.toByteArray().length];
+            byte[] cipher_b = new byte[p.toByteArray().length];
             while (true) {
                 BigInteger k = new BigInteger(p.bitLength(), rand);
                 BigInteger a;
@@ -95,8 +95,15 @@ public class project_2 {
                     String char_p = String.valueOf((int) char_arr_p[i]);
                     b = project_1_BigInt.FastExpo(y, k, p).multiply((new BigInteger(char_p).mod(p))).mod(p);
 
-                    c_a = a.toString(16);
-                    c_b = b.toString(16);
+                    byte[] cipher_a_nopad = a.toByteArray();
+                    byte[] cipher_b_nopad = b.toByteArray();
+                    for (int j = 0; j < cipher_a_nopad.length; j++) {
+                        cipher_a[cipher_a.length - cipher_a_nopad.length + j] = cipher_a_nopad[j];
+                    }
+
+                    for (int j = 0; j < cipher_a.length; j++) {
+                        ciphertext[(i * 2 * cipher_a.length) + j] = cipher_a[j];
+                    }
 
                     int maxHex = 0;
                     if (p.bitLength() % 4 != 0) {
@@ -127,7 +134,6 @@ public class project_2 {
             }
             ciphertext += (c_a + c_b);
         }
-        return ciphertext;
     }
 
     public static String ElgamalDecrypt(BigInteger p, BigInteger u, String ciphertext) {
