@@ -6,22 +6,12 @@ import java.util.Arrays;
 public class test {
 
     public static void main(String[] args) {
-        byte[] a = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-        BigInteger c = new BigInteger("1321");
-        byte[] b = c.toByteArray(); // [1, 0]
-        byte[] d = new byte[24];
-        for (int i = 0; i < b.length; i++) {
-            a[a.length - b.length + i] = b[i];
-        }
+        byte[] byte_a = new byte[] { 0, 57 };
+        BigInteger a = new BigInteger(byte_a);
+        System.out.println(a);
 
-        for (int i = 0; i < d.length / 8; i++) {
-            for (int j = 0; j < a.length; j++) {
-                d[(i * a.length) + j] = a[j];
-            }
-        }
-        System.out.println(Arrays.toString(a));
-        System.out.println(Arrays.toString(b));
-        System.out.println(new BigInteger(a));
-        System.out.println(Arrays.toString(d));
+        byte[] byte_b = new byte[] { 57 };
+        BigInteger b = new BigInteger(byte_b);
+        System.out.println(b);
     }
 }

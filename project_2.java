@@ -1,7 +1,9 @@
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Scanner;
 
 public class project_2 {
 
@@ -9,10 +11,11 @@ public class project_2 {
         BigInteger p = new BigInteger(project_1_BigInt.GenPrime(10, "text.txt"), 2);
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGen(p);
         System.out.println(elgamalKey);
-        String ciphertext = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "abcdef");
-        System.out.println("ciphertext(hex): " + ciphertext);
-        String plaintext = ElgamalDecrypt(elgamalKey.get("p"), elgamalKey.get("u"), ciphertext);
-        System.out.println("plaintext: " + plaintext);
+        byte[] ciphertext = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"),
+                "a".getBytes()[0]);
+        System.out.println("ciphertext: " + Arrays.toString(ciphertext));
+        byte[] plaintext = ElgamalDecrypt(elgamalKey.get("p"), elgamalKey.get("u"), ciphertext);
+        System.out.println("plaintext: " + (char) plaintext[0]);
     }
 
     public static BigInteger genGenerator(BigInteger p) {
@@ -78,87 +81,56 @@ public class project_2 {
         return ElgamalKey;
     }
 
-    public static void ElgamalEncrypt(BigInteger p, BigInteger g, BigInteger y, String plaintext) {
-        char[] char_arr_p = plaintext.toCharArray();
+    public static byte[] ElgamalEncrypt(BigInteger p, BigInteger g, BigInteger y, byte singleByte) {
         SecureRandom rand = new SecureRandom();
-        byte[] ciphertext = new byte[p.toByteArray().length * 2 * char_arr_p.length];
-        for (int i = 0; i < char_arr_p.length; i++) {
-            byte[] cipher_a = new byte[p.toByteArray().length];
-            byte[] cipher_b = new byte[p.toByteArray().length];
-            while (true) {
-                BigInteger k = new BigInteger(p.bitLength(), rand);
-                BigInteger a;
-                BigInteger b;
-                if (k.compareTo(new BigInteger("1")) == 1 && k.compareTo(p) == -1
-                        && project_1_BigInt.GCD(k, p.subtract(new BigInteger("1"))).equals(new BigInteger("1"))) {
-                    a = project_1_BigInt.FastExpo(g, k, p);
-                    String char_p = String.valueOf((int) char_arr_p[i]);
-                    b = project_1_BigInt.FastExpo(y, k, p).multiply((new BigInteger(char_p).mod(p))).mod(p);
+        byte[] ciphertext = new byte[p.toByteArray().length * 2];
+        byte[] cipher_a = new byte[p.toByteArray().length];
+        byte[] cipher_b = new byte[p.toByteArray().length];
+        while (true) {
+            BigInteger k = new BigInteger(p.bitLength(), rand);
+            BigInteger a;
+            BigInteger b;
+            if (k.compareTo(new BigInteger("1")) == 1 && k.compareTo(p) == -1
+                    && project_1_BigInt.GCD(k, p.subtract(new BigInteger("1"))).equals(new BigInteger("1"))) {
+                a = project_1_BigInt.FastExpo(g, k, p);
 
-                    byte[] cipher_a_nopad = a.toByteArray();
-                    byte[] cipher_b_nopad = b.toByteArray();
-                    for (int j = 0; j < cipher_a_nopad.length; j++) {
-                        cipher_a[cipher_a.length - cipher_a_nopad.length + j] = cipher_a_nopad[j];
-                    }
+                String str_singleByte = String.valueOf(singleByte);
+                BigInteger X = new BigInteger(str_singleByte);
+                b = project_1_BigInt.FastExpo(y, k, p).multiply((X.mod(p))).mod(p);
 
-                    for (int j = 0; j < cipher_a.length; j++) {
-                        ciphertext[(i * 2 * cipher_a.length) + j] = cipher_a[j];
-                    }
-
-                    int maxHex = 0;
-                    if (p.bitLength() % 4 != 0) {
-                        maxHex = (p.bitLength() / 4) + 1;
-                    } else {
-                        maxHex = p.bitLength() / 4;
-                    }
-
-                    if (c_a.length() != maxHex) {
-                        String zeros = "";
-                        for (int x = 0; x < maxHex - c_a.length(); x++) {
-                            zeros += "0";
-                        }
-                        c_a = zeros + c_a;
-                    }
-
-                    if (c_b.length() != maxHex) {
-                        String zeros = "";
-                        for (int x = 0; x < maxHex - c_b.length(); x++) {
-                            zeros += "0";
-                        }
-                        c_b = zeros + c_b;
-                    }
-                    break;
-                } else {
-                    continue;
+                byte[] cipher_a_nopad = a.toByteArray();
+                byte[] cipher_b_nopad = b.toByteArray();
+                for (int i = 0; i < cipher_a_nopad.length; i++) {
+                    cipher_a[(cipher_a.length - 1) - i] = cipher_a_nopad[(cipher_a_nopad.length - 1) - i];
                 }
+                for (int i = 0; i < cipher_b_nopad.length; i++) {
+                    cipher_b[(cipher_b.length - 1) - i] = cipher_b_nopad[(cipher_b_nopad.length - 1) - i];
+                }
+                for (int i = 0; i < ciphertext.length / 2; i++) {
+                    ciphertext[i] = cipher_a[i];
+                    ciphertext[(ciphertext.length / 2) + i] = cipher_b[i];
+                }
+                break;
             }
-            ciphertext += (c_a + c_b);
         }
+        return ciphertext;
     }
 
-    public static String ElgamalDecrypt(BigInteger p, BigInteger u, String ciphertext) {
-        String plaintext = "";
+    public static byte[] ElgamalDecrypt(BigInteger p, BigInteger u, byte[] ciphertext) {
+        byte[] plaintext;
+        byte[] cipher_a = new byte[p.toByteArray().length];
+        byte[] cipher_b = new byte[p.toByteArray().length];
 
-        int maxHex = 0;
-        if (p.bitLength() % 4 != 0) {
-            maxHex = (p.bitLength() / 4) + 1;
-        } else {
-            maxHex = p.bitLength() / 4;
+        for (int i = 0; i < ciphertext.length / 2; i++) {
+            cipher_a[i] = ciphertext[i];
+            cipher_b[i] = ciphertext[(ciphertext.length / 2) + i];
         }
 
-        BigInteger[] arr_c = new BigInteger[ciphertext.length() / maxHex];
-        for (int i = 0; i < arr_c.length; i++) {
-            String c_maxHexSize = ciphertext.substring(i * maxHex, (i + 1) * maxHex);
-            arr_c[i] = new BigInteger(c_maxHexSize, 16);
-        }
-
-        for (int i = 0; i < arr_c.length / 2; i++) {
-            BigInteger b = arr_c[(i * 2) + 1];
-            BigInteger a = arr_c[(i * 2)];
-            BigInteger a_dec = project_1_BigInt.FastExpo(a, p.subtract(new BigInteger("1")).subtract(u), p);
-            BigInteger dec = b.multiply(a_dec).mod(p);
-            plaintext += (char) dec.intValue();
-        }
+        BigInteger a = new BigInteger(cipher_a);
+        BigInteger b = new BigInteger(cipher_b);
+        BigInteger a_dec = project_1_BigInt.FastExpo(a, p.subtract(new BigInteger("1")).subtract(u), p);
+        BigInteger dec = b.multiply(a_dec).mod(p);
+        plaintext = dec.toByteArray();
 
         return plaintext;
     }
