@@ -10,13 +10,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 
 public class ppm_converter {
-    public static void writePPM(String inputFileName, String outputFileName) throws IOException {
-        BufferedImage image = ImageIO.read(new File(inputFileName));
+    public static void writePPM(String inputImageFilePath, String outputPPMFilePath) throws IOException {
+        BufferedImage image = ImageIO.read(new File(inputImageFilePath));
         int width = image.getWidth();
         int height = image.getHeight();
 
         // Create the output file
-        File outputFile = new File(outputFileName);
+        File outputFile = new File(outputPPMFilePath);
         FileOutputStream fos = new FileOutputStream(outputFile);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fos));
 
@@ -42,8 +42,8 @@ public class ppm_converter {
         writer.close();
     }
 
-    public static void readPPM(String inputFileName, String outputFileName) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFileName))) {
+    public static void readPPM(String inputPPMFilePath, String outputImageFilePath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputPPMFilePath))) {
             // Read the PPM header
             String magicNumber = reader.readLine();
             if (!magicNumber.equals("P3")) {
@@ -72,7 +72,7 @@ public class ppm_converter {
                 }
             }
 
-            ImageIO.write(image, "jpg", new File(outputFileName));
+            ImageIO.write(image, "jpg", new File(outputImageFilePath));
         }
     }
 
