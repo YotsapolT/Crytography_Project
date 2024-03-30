@@ -42,13 +42,11 @@ public class project_2 {
         SecureRandom rand = new SecureRandom();
         while (true) {
             g = new BigInteger(p.bitLength(), rand);
-            if (g.compareTo(new BigInteger("1")) == 1 && g.compareTo(p) == -1
-                    && !g.mod(p).equals(p.subtract(new BigInteger("1")))) {
+            if (g.compareTo(new BigInteger("1")) == 1 && g.compareTo(p) == -1 && !g.mod(p).equals(p.subtract(new BigInteger("1")))) {
                 BigInteger p1 = new BigInteger("0");
                 p1 = p.subtract(new BigInteger("1")).divide(new BigInteger("2"));
                 if (project_1_BigInt.isPrime(p1)) { // safe prime
-                    BigInteger primeEleTest = project_1_BigInt.FastExpo(g,
-                            p.subtract(new BigInteger("1")).divide(new BigInteger("2")), p);
+                    BigInteger primeEleTest = project_1_BigInt.FastExpo(g, p.subtract(new BigInteger("1")).divide(new BigInteger("2")), p);
                     if (!primeEleTest.equals(new BigInteger("1"))) {
                         return g;
                     } else {
@@ -109,12 +107,9 @@ public class project_2 {
             BigInteger k = new BigInteger(p.bitLength(), rand);
             BigInteger a;
             BigInteger b;
-            if (k.compareTo(new BigInteger("1")) == 1 && k.compareTo(p) == -1
-                    && project_1_BigInt.GCD(k, p.subtract(new BigInteger("1"))).equals(new BigInteger("1"))) {
+            if (k.compareTo(new BigInteger("1")) == 1 && k.compareTo(p) == -1 && project_1_BigInt.GCD(k, p.subtract(new BigInteger("1"))).equals(new BigInteger("1"))) {
                 a = project_1_BigInt.FastExpo(g, k, p);
 
-                // String str_singleByte = String.valueOf(singleByte);
-                // BigInteger X = new BigInteger(str_singleByte);
                 BigInteger X = new BigInteger(plaintText);
                 b = project_1_BigInt.FastExpo(y, k, p).multiply((X.mod(p))).mod(p);
 
@@ -228,8 +223,7 @@ public class project_2 {
             int blockSize = p.toByteArray().length;
             byte[] plaintext = new byte[fileData.length / (blockSize * 2)];
             for (int i = 0; i < plaintext.length; i++) {
-                plaintext[i] = ElgamalDecrypt(p, u,
-                        Arrays.copyOfRange(fileData, i * (blockSize * 2), ((i + 1) * (blockSize * 2))))[0];
+                plaintext[i] = ElgamalDecrypt(p, u, Arrays.copyOfRange(fileData, i * (blockSize * 2), ((i + 1) * (blockSize * 2))))[0];
             }
 
             String outputFilename = "decrypted_" + file.getName().split("encrypted_")[1];
@@ -350,8 +344,7 @@ public class project_2 {
             writer.write(split_fileData[1] + " " + split_fileData[2] + "\n");
             writer.write(split_fileData[3] + "\n");
 
-            String[][][] fileDatawoHeader = new String[Integer.parseInt(split_fileData[2])][Integer
-                    .parseInt(split_fileData[1])][3];
+            String[][][] fileDatawoHeader = new String[Integer.parseInt(split_fileData[2])][Integer.parseInt(split_fileData[1])][3];
             int count = 4;
             for (int i = 0; i < fileDatawoHeader.length; i++) {
                 for (int j = 0; j < fileDatawoHeader[i].length; j++) {
