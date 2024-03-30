@@ -19,28 +19,22 @@ public class project_2 {
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGen(p);
         System.out.println(elgamalKey);
 
-        // byte[] ci = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"),
-        // elgamalKey.get("y"),
+        // byte[] ci = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"),
         // new byte[] { Byte.parseByte("49") });
         // System.out.println(Arrays.toString(ci));
         // byte[] ci = new BigInteger("8258115").toByteArray();
         // byte[] pl = ElgamalDecrypt(elgamalKey.get("p"), elgamalKey.get("u"), ci);
         // System.out.println(Arrays.toString(pl));
 
-        // ElgamalEncryptScanner(elgamalKey.get("p"), elgamalKey.get("g"),
-        // elgamalKey.get("y"));
+        ElgamalEncryptScanner(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"));
 
-        // ElgamalEncryptTextFile(elgamalKey.get("p"), elgamalKey.get("g"),
-        // elgamalKey.get("y"), "text.txt");
+        ElgamalEncryptTextFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "text.txt");
 
-        // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"),
-        // "encrypted_textScanner.txt");
+        ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_textScanner.txt");
 
-        // ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"),
-        // elgamalKey.get("y"), "sunthana.jpg");
+        ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
 
-        // ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"),
-        // "encrypted_sunthana.ppm");
+        ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
     }
 
     public static BigInteger genGenerator(BigInteger p) {
@@ -52,7 +46,7 @@ public class project_2 {
                     && !g.mod(p).equals(p.subtract(new BigInteger("1")))) {
                 BigInteger p1 = new BigInteger("0");
                 p1 = p.subtract(new BigInteger("1")).divide(new BigInteger("2"));
-                if (project_1_BigInt.isPrime(p1)) {
+                if (project_1_BigInt.isPrime(p1)) { // safe prime
                     BigInteger primeEleTest = project_1_BigInt.FastExpo(g,
                             p.subtract(new BigInteger("1")).divide(new BigInteger("2")), p);
                     if (!primeEleTest.equals(new BigInteger("1"))) {
@@ -62,7 +56,7 @@ public class project_2 {
                         g = ((g.mod(p)).add(p)).mod(p);
                         return g;
                     }
-                } else {
+                } else { // not safe prime
                     BigInteger tmp = new BigInteger("2");
                     LinkedList<BigInteger> modList = new LinkedList<BigInteger>();
                     while (tmp.compareTo(p) == -1) {
