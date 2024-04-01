@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class project_2 {
 
     public static void main(String[] args) throws Exception {
-        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(12, "text_backup.txt"), 2);
+        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(12, "taylor.txt"), 2);
         System.out.println("Prime: " + p + "[" + p.toString(2).length() + " bits]");
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGen(p);
         System.out.println(elgamalKey);
@@ -526,5 +526,5 @@ public class project_2 {
             System.out.println(e);
         }
     }
-    
+
 }
