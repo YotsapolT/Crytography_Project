@@ -91,6 +91,74 @@ public class project_1_BigInt {
         }
     }
 
+    public static String GenSafePrime(int n, String filename) {
+        File file = new File(filename);
+        byte[] fileData = new byte[(int) file.length()];
+        try {
+            FileInputStream in = new FileInputStream(file);
+            in.read(fileData);
+            in.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        String content = "";
+        for (byte b : fileData) {
+            content += ByteToBits(b);
+        }
+
+        String biFromFile = "";
+        if (n > content.length()) {
+            return "The number of bits is more than binary input file.";
+        } else {
+            for (int i = 0; i < content.length(); i++) {
+                if (content.charAt(i) == '1') { // start binary with '1'
+                    biFromFile = content.substring(i, i + n);
+                    break;
+                }
+            }
+        }
+
+        // System.out.println("original bits: " + biFromFile);
+        System.out.println("original decimal: " + new BigInteger(biFromFile, 2));
+        BigInteger decimal = new BigInteger(biFromFile, 2);
+
+        // calculate Upper bound
+        String upperBound_bi = "";
+        for (int i = 0; i < decimal.bitLength(); i++) {
+            upperBound_bi += "1";
+        }
+        BigInteger upperBound = new BigInteger(upperBound_bi, 2);
+
+        if (isSafePrime(decimal)) {
+            System.out.println("original bits is Prime");
+            return biFromFile;
+        } else {
+            while (!isSafePrime(decimal)) {
+                if (decimal.mod(new BigInteger("2")).equals(new BigInteger("0"))) {
+                    if ((decimal.add(new BigInteger("1"))).compareTo(upperBound.add(new BigInteger("1"))) == -1
+                            && decimal.add(new BigInteger("1")).compareTo(new BigInteger("0")) == 1) {
+                        decimal = decimal.add(new BigInteger("1"));
+                    } else {
+                        System.out.println("reach maximum bits. There's no prime");
+                        break;
+                    }
+                } else {
+                    if ((decimal.add(new BigInteger("2"))).compareTo(upperBound.add(new BigInteger("1"))) == -1
+                            && decimal.add(new BigInteger("2")).compareTo(new BigInteger("0")) == 1) {
+                        decimal = decimal.add(new BigInteger("2"));
+                    } else {
+                        System.out.println("reach maximum bits, there's no prime");
+                        break;
+                    }
+                }
+            }
+            biFromFile = decimal.toString(2);
+            System.out.println("original bits is not Prime");
+            return biFromFile;
+        }
+    }
+
     public static String ByteToBits(byte b) {
         String result = "";
         for (int i = 7; i >= 0; i--) {
@@ -112,6 +180,19 @@ public class project_1_BigInt {
         if (LehmannTest(n)) {
             return true;
         } else {
+            return false;
+        }
+    }
+
+    public static boolean isSafePrime(BigInteger n){
+        if(isPrime(n)){
+            BigInteger p1 = n.subtract(new BigInteger("1")).divide(new BigInteger("2"));
+            if(isPrime(p1)){
+                return true;
+            }else{
+                return false;
+            }
+        }else{
             return false;
         }
     }
