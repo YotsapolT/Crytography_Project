@@ -11,28 +11,27 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
-
 public class project_2 {
 
     public static void main(String[] args) throws Exception {
-        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(10, "text_backup.txt"), 2);
+        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(12, "text_backup.txt"), 2);
         System.out.println("Prime: " + p + "[" + p.toString(2).length() + " bits]");
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGen(p);
         System.out.println(elgamalKey);
 
-        byte[] cipherText = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), new byte[] { Byte.parseByte("0"), Byte.parseByte("0"), Byte.parseByte("0"), Byte.parseByte("0") });
-        System.out.println(Arrays.toString(cipherText));
-        byte[] plaintText = ElgamalDecrypt(elgamalKey.get("p"), elgamalKey.get("u"), cipherText);
-        System.out.println(Arrays.toString(plaintText));
+        // byte[] cipherText = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), new byte[] { Byte.parseByte("-1")});
+        // System.out.println(Arrays.toString(cipherText));
+        // byte[] plaintText = ElgamalDecrypt(elgamalKey.get("p"), elgamalKey.get("u"), cipherText);
+        // System.out.println(Arrays.toString(plaintText));
 
         // ElgamalEncryptScanner(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"));
         // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_textScanner.txt");
 
-        // ElgamalEncryptTextFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "cap1.png");
-        // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_cap1.png");
+        // ElgamalEncryptTextFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "settings.png");
+        // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_settings.png");
 
-        // ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
-        // ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
+        ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
+        ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
     }
 
     public static BigInteger genGenerator(BigInteger p) {
@@ -98,7 +97,6 @@ public class project_2 {
     }
 
     public static byte[] ElgamalEncrypt(BigInteger p, BigInteger g, BigInteger y, byte[] plaintText) throws Exception {
-        // System.out.println(new BigInteger(plaintText));
         if (new BigInteger(plaintText).compareTo(p) == 1) {
             throw new Exception("Plain text is bigger than prime");
         }
@@ -117,9 +115,7 @@ public class project_2 {
                 b = project_1_BigInt.FastExpo(y, k, p).multiply((X.mod(p))).mod(p);
 
                 byte[] cipher_a_nopad = a.toByteArray();
-                // System.out.println(cipher_a_nopad.length);
                 byte[] cipher_b_nopad = b.toByteArray();
-                // System.out.println(cipher_b_nopad.length);
                 for (int i = 0; i < cipher_a_nopad.length; i++) {
                     cipher_a[(cipher_a.length - 1) - i] = cipher_a_nopad[(cipher_a_nopad.length - 1) - i];
                 }
@@ -137,6 +133,13 @@ public class project_2 {
     }
 
     public static byte[] ElgamalDecrypt(BigInteger p, BigInteger u, byte[] ciphertext) throws Exception{
+        if (ciphertext.length < p.toByteArray().length * 2){
+            byte[] newCipherText = new byte[p.toByteArray().length * 2];
+            for (int i = 0; i < ciphertext.length; i++){
+                newCipherText[(newCipherText.length - 1) - i] = ciphertext[(ciphertext.length - 1) - i];
+            }
+            ciphertext = newCipherText;
+        }
         BigInteger a = new BigInteger(Arrays.copyOfRange(ciphertext, 0, p.toByteArray().length));
         BigInteger b = new BigInteger(Arrays.copyOfRange(ciphertext, p.toByteArray().length, 2 * p.toByteArray().length));
         if(a.compareTo(p) == 1 || b.compareTo(p) == 1){
@@ -193,7 +196,6 @@ public class project_2 {
     public static void ElgamalEncryptTextFile(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
-        System.out.println(fileData.length);
         try {
             FileInputStream in = new FileInputStream(file);
             in.read(fileData);
@@ -202,33 +204,94 @@ public class project_2 {
             String outputFilename = "encrypted_" + file.getName();
             FileOutputStream out = new FileOutputStream(outputFilename);
 
-
             LinkedList<Byte> encryptedByteList = new LinkedList<Byte>();
             LinkedList<Byte> signedList = new LinkedList<Byte>();
             byte[] tmpArr = new byte[fileData.length];
             int tmp = 0;
-            int t = 1;
 
-            for (byte b : fileData) {
-                tmpArr[tmp] = b;
-                tmp++;
-                int signed = 1;
-                System.out.println("b: " + b);
-                System.out.println(t++);
-                if(tmpArr[0] < 0){
-                    p = p.negate();
-                    signed = -signed;
+            for (int z = 0; z < fileData.length; z++) {
+                if (fileData[z] == 0){
+                    if (z != 0 && tmp != 0){
+                        BigInteger plainText = new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp));
+                        if(plainText.compareTo(new BigInteger("0")) == -1){
+                            plainText = plainText.negate();
+                            signedList.add(Byte.parseByte("1"));
+                        }else{
+                            signedList.add(Byte.parseByte("0"));
+                        }
+                        byte[] encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                        for (byte encrypted : encryptedByte) {
+                            encryptedByteList.add(encrypted);
+                        }
+
+                        for (int i = 0; i < tmp; i++) {
+                            tmpArr[i] = Byte.parseByte("0");
+                        }
+                        tmp = 0;
+
+                        signedList.add(Byte.parseByte("0"));
+                        plainText = new BigInteger(new byte[] { fileData[z] });
+                        encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                        for (byte encrypted : encryptedByte) {
+                            encryptedByteList.add(encrypted);
+                        }
+                    }else {
+                        signedList.add(Byte.parseByte("0"));
+                        BigInteger plainText = new BigInteger(new byte[] { fileData[z] });
+                        byte[] encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                        for (byte encrypted : encryptedByte) {
+                            encryptedByteList.add(encrypted);
+                        }
+                        tmp = 0;
+                    }
+                    continue;
                 }
 
-                System.out.println(new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp)).abs().compareTo(new BigInteger("0")) != 0);
+                if(z != 0 && fileData[z - 1] == -1 && fileData[z] < 0){
+                    BigInteger plainText = new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp));
+                    if(plainText.compareTo(new BigInteger("0")) == -1){
+                        plainText = plainText.negate();
+                        signedList.add(Byte.parseByte("1"));
+                    }else{
+                        signedList.add(Byte.parseByte("0"));
+                    }
+                    byte[] encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                    for (byte encrypted : encryptedByte) {
+                        encryptedByteList.add(encrypted);
+                    }
+
+                    signedList.add(Byte.parseByte("1"));
+                    plainText = new BigInteger(new byte[] { fileData[z] });
+                    plainText = plainText.negate();
+                    encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                    for (byte encrypted : encryptedByte) {
+                        encryptedByteList.add(encrypted);
+                    }
+                    tmpArr[0] = 0; 
+                    tmp = 0;
+                    continue;
+                }
+
+                tmpArr[tmp] = fileData[z];
+                tmp++;
+                int signed = 1;
+                if(tmpArr[0] < 0){
+                    if(p.compareTo(new BigInteger("0")) == 1){
+                        p = p.negate();
+                    }
+                    signed = -signed;
+                }else{
+                    if(p.compareTo(new BigInteger("0")) == -1){
+                        p = p.negate();
+                    }
+                }
+                
                 if (new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp)).compareTo(p) == -signed && 
-                    new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp)).negate().compareTo(p.negate()) == signed &&
-                    new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp)).abs().compareTo(new BigInteger("0")) != 0){
+                        new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp)).negate().compareTo(p.negate()) == signed &&
+                        p.abs().toByteArray().length >= tmp) {
                     continue;
                 }else {
                     BigInteger plainText = new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp - 1));
-                    System.out.println(Arrays.toString(Arrays.copyOfRange(tmpArr, 0, tmp - 1)));
-                    System.out.println("p: " + plainText);
                     if(plainText.compareTo(new BigInteger("0")) == -1){
                         plainText = plainText.negate();
                         signedList.add(Byte.parseByte("1"));
@@ -249,25 +312,19 @@ public class project_2 {
             }
             
             //last round
-            for(int i = 0; i < tmpArr.length; i++){
-                if (tmpArr[i] == 0){
-                    break;
+            if ( tmpArr[0] != 0 ){
+                BigInteger plainText = new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp));
+                if(plainText.compareTo(new BigInteger("0")) == -1){
+                    plainText = plainText.negate();
+                    signedList.add(Byte.parseByte("1"));
                 }else{
-                    tmp = i;
+                    signedList.add(Byte.parseByte("0"));
+                }
+                byte[] encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
+                for (byte encrypted : encryptedByte) {
+                    encryptedByteList.add(encrypted);
                 }
             }
-            BigInteger plainText = new BigInteger(Arrays.copyOfRange(tmpArr, 0, tmp + 1));
-            if(plainText.compareTo(new BigInteger("0")) == -1){
-                plainText = plainText.negate();
-                signedList.add(Byte.parseByte("1"));
-            }else{
-                signedList.add(Byte.parseByte("0"));
-            }
-            byte[] encryptedByte = ElgamalEncrypt(p.abs(), g, y, plainText.toByteArray());
-            for (byte encrypted : encryptedByte) {
-                encryptedByteList.add(encrypted);
-            }
-
             byte[] encryptedfileData = new byte[encryptedByteList.size() + signedList.size()]; 
             for (int i = 0; i < encryptedByteList.size(); i++) {
                 encryptedfileData[i] = encryptedByteList.get(i);
@@ -365,8 +422,7 @@ public class project_2 {
             writer.write(split_fileData[1] + " " + split_fileData[2] + "\n");
             writer.write(split_fileData[3] + "\n");
 
-            String[][][] fileDatawoHeader = new String[Integer.parseInt(split_fileData[2])][Integer
-                    .parseInt(split_fileData[1])][3];
+            String[][][] fileDatawoHeader = new String[Integer.parseInt(split_fileData[2])][Integer.parseInt(split_fileData[1])][3];
             int count = 4;
             for (int i = 0; i < fileDatawoHeader.length; i++) {
                 for (int j = 0; j < fileDatawoHeader[i].length; j++) {
@@ -470,5 +526,5 @@ public class project_2 {
             System.out.println(e);
         }
     }
-
+    
 }
