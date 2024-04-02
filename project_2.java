@@ -18,6 +18,13 @@ public class project_2 {
         System.out.println("Prime: " + p + "[" + p.toString(2).length() + " bits]");
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGen(p);
         System.out.println(elgamalKey);
+        savePublicKey(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "1");
+        savePrivateKey(elgamalKey.get("p"), elgamalKey.get("u"), "1");
+
+        HashMap<String, BigInteger> ElgamalPublicKey = readPublicKey("pk_1.txt");
+        System.out.println(ElgamalPublicKey);
+        HashMap<String, BigInteger> ElgamalPrivateKey = readPrivateKey("sk_1.txt");
+        System.out.println(ElgamalPrivateKey);
 
         // byte[] cipherText = ElgamalEncrypt(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), new byte[] { Byte.parseByte("-1")});
         // System.out.println(Arrays.toString(cipherText));
@@ -25,13 +32,13 @@ public class project_2 {
         // System.out.println(Arrays.toString(plaintText));
 
         // ElgamalEncryptScanner(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"));
-        // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_textScanner.txt");
+        // ElgamalDecryptFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_textScanner.txt");
 
-        // ElgamalEncryptTextFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "settings.png");
-        // ElgamalDecryptTextFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_settings.png");
+        // ElgamalEncryptFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "settings.png");
+        // ElgamalDecryptFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_settings.png");
 
-        ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
-        ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
+        // ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
+        // ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
     }
 
     public static BigInteger genGenerator(BigInteger p) {
@@ -146,24 +153,7 @@ public class project_2 {
             throw new Exception("Cipher text is bigger than prime");
         }
 
-        if (ciphertext.length != p.toByteArray().length * 2) {
-            byte[] tmp = Arrays.copyOf(ciphertext, ciphertext.length);
-            ciphertext = new byte[p.toByteArray().length * 2];
-            for (int i = 0; i < tmp.length; i++) {
-                ciphertext[(ciphertext.length - 1) - i] = tmp[(tmp.length - 1) - i];
-            }
-        }
         byte[] plaintext;
-        byte[] cipher_a = new byte[p.toByteArray().length];
-        byte[] cipher_b = new byte[p.toByteArray().length];
-
-        for (int i = 0; i < ciphertext.length / 2; i++) {
-            cipher_a[i] = ciphertext[i];
-            cipher_b[i] = ciphertext[(ciphertext.length / 2) + i];
-        }
-
-        a = new BigInteger(cipher_a);
-        b = new BigInteger(cipher_b);
         BigInteger a_dec = project_1_BigInt.FastExpo(a, p.subtract(new BigInteger("1")).subtract(u), p);
         BigInteger dec = b.multiply(a_dec).mod(p);
         plaintext = dec.toByteArray();
@@ -187,13 +177,13 @@ public class project_2 {
             out.write(str);
             out.close();
 
-            ElgamalEncryptTextFile(p, g, y, "textScanner.txt");
+            ElgamalEncryptFile(p, g, y, "textScanner.txt");
         } catch (IOException e) {
             System.out.println(e);
         }
     }
 
-    public static void ElgamalEncryptTextFile(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
+    public static void ElgamalEncryptFile(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -340,7 +330,7 @@ public class project_2 {
         }
     }
 
-    public static void ElgamalDecryptTextFile(BigInteger p, BigInteger u, String filePath) throws Exception{
+    public static void ElgamalDecryptFile(BigInteger p, BigInteger u, String filePath) throws Exception{
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -527,4 +517,152 @@ public class project_2 {
         }
     }
 
+    public static void savePublicKey(BigInteger p, BigInteger g, BigInteger y, String pkName){
+        String outputFileName = "pk_" + pkName + ".txt";
+        try{
+            FileOutputStream out = new FileOutputStream(outputFileName);
+            char[] p_chrArr = p.toString().toCharArray();
+            char[] g_chrArr = g.toString().toCharArray();
+            char[] y_charArr = y.toString().toCharArray();
+            byte[] pkFileData = new byte[p_chrArr.length + g_chrArr.length + y_charArr.length + 2];
+
+            for (int i = 0; i < p_chrArr.length; i++) {
+                pkFileData[i] = (byte) p_chrArr[i];
+            }
+            pkFileData[p_chrArr.length] = Byte.parseByte("10");
+            for (int i = 0; i < g_chrArr.length; i++) {
+                pkFileData[p_chrArr.length + 1 + i] = (byte) g_chrArr[i];
+            }
+            pkFileData[p_chrArr.length + g_chrArr.length + 1] = Byte.parseByte("10");
+            for (int i = 0; i < y_charArr.length; i++) {
+                pkFileData[p_chrArr.length + g_chrArr.length + 2 + i] = (byte) y_charArr[i];
+            }
+
+            out.write(pkFileData);
+            out.close();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
+    public static void savePrivateKey(BigInteger p, BigInteger u, String skName){
+        String outputFileName = "sk_" + skName + ".txt";
+        try{
+            FileOutputStream out = new FileOutputStream(outputFileName);
+            char[] p_chrArr = p.toString().toCharArray();
+            char[] u_chrArr = u.toString().toCharArray();
+            byte[] pkFileData = new byte[p_chrArr.length + u_chrArr.length + 1];
+
+            for (int i = 0; i < p_chrArr.length; i++) {
+                pkFileData[i] = (byte) p_chrArr[i];
+            }
+            pkFileData[p_chrArr.length] = Byte.parseByte("10");
+            for (int i = 0; i < u_chrArr.length; i++) {
+                pkFileData[p_chrArr.length + 1 + i] = (byte) u_chrArr[i];
+            }
+
+            out.write(pkFileData);
+            out.close();
+        }catch (Exception e){
+            
+        }
+    }
+
+    public static HashMap<String, BigInteger> readPublicKey(String filePath){
+        HashMap<String, BigInteger> ElgamalPublicKey = new HashMap<String, BigInteger>();
+        File file = new File(filePath);
+        byte[] fileData = new byte[(int) file.length()];
+        try{
+            FileInputStream in = new FileInputStream(file);
+            in.read(fileData);
+            in.close();
+
+            int tmpStart = 0;
+            int tmpStop = 0;
+            int LFcount = 0;
+            for (int i = 0; i < fileData.length; i++) {
+                if (fileData[i] == 10 && LFcount == 0){
+                    char[] p_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        p_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger p = new BigInteger(new String(p_chrArr));
+                    ElgamalPublicKey.put("p", p);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else if (fileData[i] == 10 && LFcount == 1){
+                    char[] g_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        g_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger g = new BigInteger(new String(g_chrArr));
+                    ElgamalPublicKey.put("g", g);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else if (tmpStop == fileData.length - 1 && LFcount == 2){
+                    tmpStop++;
+                    char[] y_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        y_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger y = new BigInteger(new String(y_chrArr));
+                    ElgamalPublicKey.put("y", y);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else{
+                    tmpStop++;
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        return ElgamalPublicKey;
+    }
+
+    public static HashMap<String, BigInteger> readPrivateKey(String filePath){    
+        HashMap<String, BigInteger> ElgamalPrivateKey = new HashMap<String, BigInteger>();
+        File file = new File(filePath);
+        byte[] fileData = new byte[(int) file.length()];
+        try{
+            FileInputStream in = new FileInputStream(file);
+            in.read(fileData);
+            in.close();
+
+            int tmpStart = 0;
+            int tmpStop = 0;
+            int LFcount = 0;
+            for (int i = 0; i < fileData.length; i++) {
+                if (fileData[i] == 10 && LFcount == 0){
+                    char[] p_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        p_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger p = new BigInteger(new String(p_chrArr));
+                    ElgamalPrivateKey.put("p", p);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else if (tmpStop == fileData.length - 1 && LFcount == 1){
+                    tmpStop++;
+                    char[] u_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        u_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger u = new BigInteger(new String(u_chrArr));
+                    ElgamalPrivateKey.put("u", u);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else{
+                    tmpStop++;
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        return ElgamalPrivateKey;
+    }
 }
