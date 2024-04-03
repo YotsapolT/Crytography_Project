@@ -75,10 +75,10 @@ public class Application {
 
     public static void ElgamalVerifyFile(){
         in.nextLine();
-        System.out.print("Enter signature's file path of file path you want to verify: ");
-        String signedFilePath = in.nextLine();
         System.out.print("Enter file path: ");
         String filePath = in.nextLine();
+        System.out.print("Enter signature's file path of file path you want to verify: ");
+        String signedFilePath = in.nextLine();
         System.out.print("Enter public key's sender file path: ");
         String pkFilePath = in.nextLine();
         HashMap<String, BigInteger> PublicKey = readPublicKey(pkFilePath);
