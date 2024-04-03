@@ -82,7 +82,7 @@ public class Application {
         System.out.print("Enter public key's sender file path: ");
         String pkFilePath = in.nextLine();
         HashMap<String, BigInteger> PublicKey = readPublicKey(pkFilePath);
-        project_3.ElgamalVerifyFile(PublicKey.get("p"), PublicKey.get("u"), PublicKey.get("g"), filePath, signedFilePath);
+        project_3.ElgamalVerifyFile(PublicKey.get("p"), PublicKey.get("g"), PublicKey.get("y"), filePath, signedFilePath);
     }
 
 }
