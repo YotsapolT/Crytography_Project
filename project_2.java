@@ -639,8 +639,8 @@ public class project_2 {
             FileOutputStream out = new FileOutputStream(outputFileName);
             char[] p_chrArr = p.toString().toCharArray();
             char[] g_chrArr = g.toString().toCharArray();
-            char[] y_charArr = y.toString().toCharArray();
-            byte[] pkFileData = new byte[p_chrArr.length + g_chrArr.length + y_charArr.length + 2];
+            char[] y_chrArr = y.toString().toCharArray();
+            byte[] pkFileData = new byte[p_chrArr.length + g_chrArr.length + y_chrArr.length + 2];
 
             for (int i = 0; i < p_chrArr.length; i++) {
                 pkFileData[i] = (byte) p_chrArr[i];
@@ -650,8 +650,8 @@ public class project_2 {
                 pkFileData[p_chrArr.length + 1 + i] = (byte) g_chrArr[i];
             }
             pkFileData[p_chrArr.length + g_chrArr.length + 1] = Byte.parseByte("10");
-            for (int i = 0; i < y_charArr.length; i++) {
-                pkFileData[p_chrArr.length + g_chrArr.length + 2 + i] = (byte) y_charArr[i];
+            for (int i = 0; i < y_chrArr.length; i++) {
+                pkFileData[p_chrArr.length + g_chrArr.length + 2 + i] = (byte) y_chrArr[i];
             }
 
             out.write(pkFileData);
@@ -661,13 +661,14 @@ public class project_2 {
         }
     }
 
-    public static void savePrivateKey(BigInteger p, BigInteger u, String skName){
+    public static void savePrivateKey(BigInteger p, BigInteger u, BigInteger g,String skName){
         String outputFileName = "sk_" + skName + ".txt";
         try{
             FileOutputStream out = new FileOutputStream(outputFileName);
             char[] p_chrArr = p.toString().toCharArray();
             char[] u_chrArr = u.toString().toCharArray();
-            byte[] pkFileData = new byte[p_chrArr.length + u_chrArr.length + 1];
+            char[] g_chrArr = g.toString().toCharArray();
+            byte[] pkFileData = new byte[p_chrArr.length + u_chrArr.length + g_chrArr.length + 2];
 
             for (int i = 0; i < p_chrArr.length; i++) {
                 pkFileData[i] = (byte) p_chrArr[i];
@@ -675,6 +676,10 @@ public class project_2 {
             pkFileData[p_chrArr.length] = Byte.parseByte("10");
             for (int i = 0; i < u_chrArr.length; i++) {
                 pkFileData[p_chrArr.length + 1 + i] = (byte) u_chrArr[i];
+            }
+            pkFileData[p_chrArr.length + u_chrArr.length + 1] = Byte.parseByte("10");
+            for (int i = 0; i < g_chrArr.length; i++) {
+                pkFileData[p_chrArr.length + u_chrArr.length + 2 + i] = (byte) g_chrArr[i];
             }
 
             out.write(pkFileData);
@@ -761,14 +766,24 @@ public class project_2 {
                     tmpStart = tmpStop + 1;
                     tmpStop = tmpStart;
                     LFcount++;
-                }else if (tmpStop == fileData.length - 1 && LFcount == 1){
-                    tmpStop++;
+                }else if (fileData[i] == 10 && LFcount == 1){
                     char[] u_chrArr = new char[tmpStop - tmpStart];
                     for (int j = 0; j < tmpStop - tmpStart; j++) {
                         u_chrArr[j] = (char) fileData[tmpStart + j]; 
                     }
                     BigInteger u = new BigInteger(new String(u_chrArr));
                     ElgamalPrivateKey.put("u", u);
+                    tmpStart = tmpStop + 1;
+                    tmpStop = tmpStart;
+                    LFcount++;
+                }else if (tmpStop == fileData.length - 1 && LFcount == 2){
+                    tmpStop++;
+                    char[] g_chrArr = new char[tmpStop - tmpStart];
+                    for (int j = 0; j < tmpStop - tmpStart; j++) {
+                        g_chrArr[j] = (char) fileData[tmpStart + j]; 
+                    }
+                    BigInteger g = new BigInteger(new String(g_chrArr));
+                    ElgamalPrivateKey.put("g", g);
                     tmpStart = tmpStop + 1;
                     tmpStop = tmpStart;
                     LFcount++;

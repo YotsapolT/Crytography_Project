@@ -4,3 +4,5 @@ sk*.txt
 encrypted*.txt
 decrypted*.txt
 test.*
+signature*.txt
+hash*.txt

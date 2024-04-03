@@ -64,11 +64,25 @@ public class Application {
     }
     
     public static void ElgamalSignFile(){
-        System.out.println("Coming soon!");
+        in.nextLine();
+        System.out.print("Enter file path you want to sign: ");
+        String filePath = in.nextLine();
+        System.out.print("Enter private key's sender file path: ");
+        String skFilePath = in.nextLine();
+        HashMap<String, BigInteger> PrivateKey = readPrivateKey(skFilePath);
+        project_3.ElgamalSignFile(PrivateKey.get("p"), PrivateKey.get("u"), PrivateKey.get("g"), filePath);
     }
 
     public static void ElgamalVerifyFile(){
-        System.out.println("Coming soon!");
+        in.nextLine();
+        System.out.print("Enter signature's file path of file path you want to verify: ");
+        String signedFilePath = in.nextLine();
+        System.out.print("Enter file path: ");
+        String filePath = in.nextLine();
+        System.out.print("Enter public key's sender file path: ");
+        String pkFilePath = in.nextLine();
+        HashMap<String, BigInteger> PublicKey = readPublicKey(pkFilePath);
+        project_3.ElgamalVerifyFile(PublicKey.get("p"), PublicKey.get("u"), PublicKey.get("g"), filePath, signedFilePath);
     }
 
 }
