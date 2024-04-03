@@ -51,8 +51,8 @@ public class project_1_BigInt {
             }
         }
 
-        System.out.println("original bits: " + biFromFile);
-        System.out.println("original decimal: " + new BigInteger(biFromFile, 2));
+        // System.out.println("original bits: " + biFromFile);
+        // System.out.println("original decimal: " + new BigInteger(biFromFile, 2));
         BigInteger decimal = new BigInteger(biFromFile, 2);
 
         // calculate Upper bound
@@ -63,7 +63,7 @@ public class project_1_BigInt {
         BigInteger upperBound = new BigInteger(upperBound_bi, 2);
 
         if (isPrime(decimal)) {
-            System.out.println("original bits is Prime");
+            // System.out.println("original bits is Prime");
             return biFromFile;
         } else {
             while (!isPrime(decimal)) {
@@ -86,7 +86,7 @@ public class project_1_BigInt {
                 }
             }
             biFromFile = decimal.toString(2);
-            System.out.println("original bits is not Prime");
+            // System.out.println("original bits is not Prime");
             return biFromFile;
         }
     }

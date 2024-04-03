@@ -86,7 +86,6 @@ public class project_2 {
     public static HashMap<String, BigInteger> ElgamalKeyGen(BigInteger p) {
         HashMap<String, BigInteger> ElgamalKey = new HashMap<String, BigInteger>();
         BigInteger g = genGenerator(p);
-        System.out.println("successfully generate Generator!");
         SecureRandom rand = new SecureRandom();
         BigInteger u;
         while (true) {
@@ -512,6 +511,7 @@ public class project_2 {
             writer.close();
 
             ppm_converter.readPPM(decryptedPPM, decryptedImage);
+            System.out.println("Image file decrypted successfully. Decrypted file saved as: " + decryptedImage);
         } catch (IOException e) {
             System.out.println(e);
         }

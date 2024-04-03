@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 public class test {
     public static void main(String[] args) {
-        char a = 'a';
-        System.out.println((byte) a);
+        BigInteger a = new BigInteger("187145566098708449248599108929243504267");
+        System.out.println(a.toByteArray().length);
         
     }
 }
