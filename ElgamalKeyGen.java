@@ -38,10 +38,10 @@ public class ElgamalKeyGen {
         System.out.println("Successfully saved public key to " + "pk_" + pkFileName + ".txt");
     }
 
-    public static void savePrivateKey(BigInteger p, BigInteger u){
+    public static void savePrivateKey(BigInteger p, BigInteger u, BigInteger g){
         System.out.print("Enter file name to save private key: ");
         String skFileName = in.nextLine();
-        project_2.savePrivateKey(p, u, skFileName);
+        project_2.savePrivateKey(p, u, g, skFileName);
         System.out.println("Successfully saved public key to " + "sk_" + skFileName + ".txt");
     }
 }
