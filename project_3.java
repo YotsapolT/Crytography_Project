@@ -163,6 +163,8 @@ public class project_3 {
             for (int i = 0; i < signature_chr.length; i++) {
                 out.write(signature_chr[i]);
             }
+            System.out.println("Signature file signed successfully. Signature file saved as: " + outputFileName);
+
             out.close();
         } catch (Exception e) {
             System.out.println(e);
