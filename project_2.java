@@ -34,8 +34,8 @@ public class project_2 {
         // ElgamalEncryptScanner(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"));
         // ElgamalDecryptFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_textScanner.txt");
 
-        ElgamalEncryptFileNew(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
-        ElgamalDecryptFileNew(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.jpg");
+        ElgamalEncryptFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
+        ElgamalDecryptFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.jpg");
 
         // ElgamalEncryptImageFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "sunthana.jpg");
         // ElgamalDecryptImageFile(elgamalKey.get("p"), elgamalKey.get("u"), "encrypted_sunthana.ppm");
@@ -182,7 +182,7 @@ public class project_2 {
         }
     }
 
-    public static void ElgamalEncryptFile(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
+    public static void ElgamalEncryptFileOld(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -329,7 +329,7 @@ public class project_2 {
         }
     }
 
-    public static void ElgamalEncryptFileNew(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
+    public static void ElgamalEncryptFile(BigInteger p, BigInteger g, BigInteger y, String filePath) throws Exception {
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -409,7 +409,7 @@ public class project_2 {
         }
     }
 
-    public static void ElgamalDecryptFile(BigInteger p, BigInteger u, String filePath) throws Exception{
+    public static void ElgamalDecryptFileOld(BigInteger p, BigInteger u, String filePath) throws Exception{
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {
@@ -453,7 +453,7 @@ public class project_2 {
         }
     }
 
-    public static void ElgamalDecryptFileNew(BigInteger p, BigInteger u, String filePath) throws Exception{
+    public static void ElgamalDecryptFile(BigInteger p, BigInteger u, String filePath) throws Exception{
         File file = new File(filePath);
         byte[] fileData = new byte[(int) file.length()];
         try {

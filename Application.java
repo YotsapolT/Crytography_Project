@@ -3,76 +3,34 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Application {
+    static Scanner in = new Scanner(System.in);
     public static void main(String[] args) throws Exception{
-        Scanner in = new Scanner(System.in);
-        // System.out.print("Enter number of bit to generate safe prime number: ");
-        // int numBits = in.nextInt();
-        // System.out.print("Enter file path to generate safe prime number: ");
-        // in.nextLine();
-        // String fileName = in.nextLine();
+        System.out.println("Choose Elgamal algorithm!");
+        System.out.println("1. Encryption");
+        System.out.println("2. Decryption");
+        System.out.println("3. Signature");
+        System.out.println("4. Verification");
+        System.out.print("Enter a number to choose: ");
+        int algorithm = in.nextInt();
 
-        // BigInteger p = genSafePrime(numBits, fileName);
-        // System.out.println("Prime: " + p + "[" + p.toString(2).length() + " bits]");
-
-        // System.out.println("Starting generate key...");
-        // HashMap<String, BigInteger> elgamalKey = ElgamalKeyGenerate(p);
-        // System.out.println("Successfully generated key.");
-        // System.out.println(elgamalKey);
-
-        // System.out.print("Enter file name to save public key: ");
-        // String pkFileName = in.nextLine();
-        // savePublicKey(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), pkFileName);
-        // System.out.println("Successfully saved public key to " + "pk_" + pkFileName + ".txt");
-
-        // System.out.print("Enter file name to save private key: ");
-        // String skFileName = in.nextLine();
-        // savePrivateKey(elgamalKey.get("p"), elgamalKey.get("u"), skFileName);
-        // System.out.println("Successfully saved public key to " + "sk_" + skFileName + ".txt");
-         
-        System.out.print("Enter file name to read private key: ");
-        String skFileName = in.nextLine();
-        HashMap<String, BigInteger> ElgamalPrivateKey = readPrivateKey(skFileName);
-        System.out.println("Successfully read private key: " + ElgamalPrivateKey);
-
-        System.out.println("choose method to decrypt.");
-        System.out.print("1. File(all type), 2. Image file (with bitmap): ");
-        int encryptType = in.nextInt();
-        switch (encryptType) {
+        switch (algorithm) {
             case 1:
-                System.out.print("Enter file path to decrypt: ");
-                in.nextLine();
-                String decFilePath = in.nextLine();
-                project_2.ElgamalDecryptFile(ElgamalPrivateKey.get("p"), ElgamalPrivateKey.get("u"), decFilePath);
+                ElgamalEncryptFile();
                 break;
             case 2:
-                System.out.print("Enter image file path to decrypt(.png, .jpg, .jpeg): ");
-                in.nextLine();
-                String decImageFilePath = in.nextLine();
-                project_2.ElgamalDecryptImageFile(ElgamalPrivateKey.get("p"), ElgamalPrivateKey.get("u"), decImageFilePath);
+                ElgamalDecryptFile();
+                break;
+            case 3:
+                ElgamalSignFile();
+                break;
+            case 4:
+                ElgamalVerifyFile();
                 break;
             default:
-                System.out.println("please enter a number between 1-3!");
+                System.out.println("Please enter a number between 1-4");
                 break;
         }
         in.close();
-    }
-
-    public static BigInteger genSafePrime(int numBits, String fileName){
-        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(numBits, fileName), 2);
-        return p;
-    }
-
-    public static HashMap<String, BigInteger> ElgamalKeyGenerate(BigInteger p){
-        HashMap<String, BigInteger> elgamalKey = project_2.ElgamalKeyGen(p);
-        return elgamalKey;
-    }
-
-    public static void savePublicKey(BigInteger p, BigInteger g, BigInteger y, String pkName){
-        project_2.savePublicKey(p, g, y, pkName);
-    }
-
-    public static void savePrivateKey(BigInteger p, BigInteger u, String pkName){
-        project_2.savePrivateKey(p, u, pkName);
     }
 
     public static HashMap<String, BigInteger> readPublicKey(String filePath){
@@ -83,6 +41,34 @@ public class Application {
     public static HashMap<String, BigInteger> readPrivateKey(String filePath){
         HashMap<String, BigInteger> ElgamalPrivateKey = project_2.readPrivateKey(filePath);
         return ElgamalPrivateKey;
+    }
+
+    public static void ElgamalEncryptFile() throws Exception{
+        in.nextLine();
+        System.out.print("Enter file path you want to encrypt: ");
+        String filePath = in.nextLine();
+        System.out.print("Enter public key's receiver file path: ");
+        String pkFilePath = in.nextLine();
+        HashMap<String, BigInteger> PublicKey = readPublicKey(pkFilePath);
+        project_2.ElgamalEncryptFile(PublicKey.get("p"), PublicKey.get("g"), PublicKey.get("y"), filePath);
+    }
+
+    public static void ElgamalDecryptFile() throws Exception{
+        in.nextLine();
+        System.out.print("Enter file path you want to decrypt: ");
+        String filePath = in.nextLine();
+        System.out.print("Enter private key's receiver file path: ");
+        String skFilePath = in.nextLine();
+        HashMap<String, BigInteger> PrivateKey = readPrivateKey(skFilePath);
+        project_2.ElgamalDecryptFile(PrivateKey.get("p"), PrivateKey.get("u"), filePath);
+    }
+    
+    public static void ElgamalSignFile(){
+        System.out.println("Coming soon!");
+    }
+
+    public static void ElgamalVerifyFile(){
+        System.out.println("Coming soon!");
     }
 
 }
