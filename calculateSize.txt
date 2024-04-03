@@ -1,0 +1,4 @@
+blockSize = (log2(p) / 8) + 1
+cipher = (a,b) = 2 * blockSize
+file (a byte) -> encrypted file (<=2a byte)*
+*more Zeros => less encrypted file size
