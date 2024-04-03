@@ -1,4 +1,6 @@
-test_file/
+test_file
 pk*.txt
 sk*.txt
+encrypted*.txt
+decrypted*.txt
 test.*
