@@ -8,7 +8,7 @@ public class ElgamalKeyGen {
         BigInteger p = genSafePrime();
         HashMap<String, BigInteger> elgamalKey = ElgamalKeyGenerate(p);
         savePublicKey(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"));
-        savePrivateKey(elgamalKey.get("p"), elgamalKey.get("u"));
+        savePrivateKey(elgamalKey.get("p"), elgamalKey.get("u"), elgamalKey.get("g"));
         in.close();
     }
 
