@@ -4,31 +4,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.security.SecureRandom;
 
 public class project_3 {
-    public static void main(String[] args) throws Exception{
-        BigInteger p = new BigInteger(project_1_BigInt.GenSafePrime(128, "test_file\\taylor.txt"), 2);
-        System.out.println("Prime: " + p + "[" + p.toString(2).length() + " bits]");
-        HashMap<String, BigInteger> elgamalKey = project_2.ElgamalKeyGen(p);
-        // System.out.println(elgamalKey);
-
-        // byte[] plainText = new byte[] { Byte.parseByte("1") };
-        // byte[] sign = ElgamalSignature(elgamalKey.get("p"), elgamalKey.get("u"), elgamalKey.get("g"), plainText);
-        // System.out.println(Arrays.toString(sign));
-        // boolean isVerify = ElgamalVerification(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), plainText, sign);
-        // System.out.println(isVerify);
-
-        // byte[] hashedText = RWHash(p, "test_file\\text.txt");
-        // System.out.println(Arrays.toString(hashedText));
-
-        ElgamalSignFile(elgamalKey.get("p"), elgamalKey.get("u"), elgamalKey.get("g"), "test_file\\text.txt");
-        ElgamalVerifyFile(elgamalKey.get("p"), elgamalKey.get("g"), elgamalKey.get("y"), "test_file\\text.txt", "signature_text.txt");
-    }
-
-    public static byte[] ElgamalSignature(BigInteger p, BigInteger u, BigInteger g, byte[] plaintext){
+    public static byte[] ElgamalSignature(BigInteger p, BigInteger u, BigInteger g, byte[] plaintext) {
         SecureRandom rand = new SecureRandom();
         byte[] sign = new byte[p.toByteArray().length * 2];
         byte[] cipher_r = new byte[p.toByteArray().length];
@@ -62,7 +42,7 @@ public class project_3 {
         return sign;
     }
 
-    public static boolean ElgamalVerification(BigInteger p, BigInteger g, BigInteger y, byte[] plainText, byte[] signedText) throws Exception{
+    public static boolean ElgamalVerification(BigInteger p, BigInteger g, BigInteger y, byte[] plainText, byte[] signedText) {
         if (signedText.length < p.toByteArray().length * 2){
             byte[] newSignedText = new byte[p.toByteArray().length * 2];
             for (int i = 0; i < signedText.length; i++){
@@ -73,7 +53,8 @@ public class project_3 {
         BigInteger r = new BigInteger(Arrays.copyOfRange(signedText, 0, p.toByteArray().length));
         BigInteger s = new BigInteger(Arrays.copyOfRange(signedText, p.toByteArray().length, 2 * p.toByteArray().length));
         if(r.compareTo(p) == 1 || s.compareTo(p) == 1){
-            throw new Exception("Cipher text is bigger than prime");
+            System.out.println("Signed text is bigger than prime");
+            System.exit(0);
         }
         
         BigInteger X = new BigInteger(plainText);
@@ -88,7 +69,7 @@ public class project_3 {
         }
     }
 
-    public static byte[] RWHash(BigInteger p, String filePath){
+    public static byte[] RWHash(BigInteger p, String filePath) {
         int size = p.bitLength();
         int totalBits = 5 * size * 4;
         BigInteger[] hashBlock = new BigInteger[5];
@@ -166,7 +147,7 @@ public class project_3 {
             System.out.println("Signature file signed successfully. Signature file saved as: " + outputFileName);
 
             out.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.out.println(e);
         }
     } 
@@ -191,7 +172,7 @@ public class project_3 {
             }
 
             in.close();
-        }catch (Exception e){
+        }catch (IOException e){
             System.out.println(e);
         }
     }
