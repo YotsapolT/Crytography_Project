@@ -65,14 +65,14 @@ public class Application {
     }
 
     public static void savePublicKey(BigInteger p, BigInteger g, BigInteger y) {
-        System.out.print("Enter file name to save public key: ");
+        System.out.print("Enter file name to save public key(pk_[input].txt): ");
         String pkFileName = in.nextLine();
         project_2.savePublicKey(p, g, y, pkFileName);
         System.out.println("Successfully saved public key to " + "pk_" + pkFileName + ".txt");
     }
 
     public static void savePrivateKey(BigInteger p, BigInteger u, BigInteger g) {
-        System.out.print("Enter file name to save private key: ");
+        System.out.print("Enter file name to save private key(sk_[input].txt): ");
         String skFileName = in.nextLine();
         project_2.savePrivateKey(p, u, g, skFileName);
         System.out.println("Successfully saved public key to " + "sk_" + skFileName + ".txt");
