@@ -4,10 +4,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.security.SecureRandom;
 
 public class project_3 {
+    public static void main(String[] args) {
+        RWHash(new BigInteger("523"), "test.txt");   
+    }
+
     public static byte[] ElgamalSignature(BigInteger p, BigInteger u, BigInteger g, byte[] plaintext) {
         SecureRandom rand = new SecureRandom();
         byte[] sign = new byte[p.toByteArray().length * 2];
@@ -70,65 +73,70 @@ public class project_3 {
     }
 
     public static byte[] RWHash(BigInteger p, String filePath) {
-        int size = p.bitLength();
-        int totalBits = 5 * size * 4;
-        BigInteger[] hashBlock = new BigInteger[5];
+        int size = p.bitLength() - 1;
+        // System.out.println("size: " + size);
+        int totalBitsPerBlock = 5 * size;
+        // System.out.println("totalBitsPerBlock: " + totalBitsPerBlock);
+        byte[] hashedText = null;
         try{
             File file = new File(filePath);
             FileInputStream in = new FileInputStream(file);
             byte[] fileData = new byte[(int) file.length()];
             in.read(fileData);
 
-            LinkedList<Character> fileDataBinList = new LinkedList<Character>();
+            // System.out.println("fileData.length: " + fileData.length + " bytes => " + fileData.length * 8 + " bits");
+            BigInteger[] hashBlock = new BigInteger[(int) Math.ceil((fileData.length * 8) / (double) totalBitsPerBlock) + 1];
 
+            // System.out.println("hashBlock.length: " + hashBlock.length);
+            String[][] binEachHashBlock = new String[hashBlock.length - 1][1];
+            for (int i = 0; i < binEachHashBlock.length; i++) {
+                for (int j = 0; j < binEachHashBlock[i].length; j++) {
+                    binEachHashBlock[i][j] = "";
+                }
+            }
+
+            int tmpHashBlock = 0;
             for (int i = 0; i < fileData.length; i++) {
                 char[] fileDataBinChr = project_1_BigInt.ByteToBits(fileData[i]).toCharArray();
 
                 for (int j = 0; j < fileDataBinChr.length; j++) {
-                    if (fileDataBinList.size() <= totalBits){
-                        fileDataBinList.add((Character) fileDataBinChr[j]);
+                    if (binEachHashBlock[tmpHashBlock][0].length() < totalBitsPerBlock){
+                        binEachHashBlock[tmpHashBlock][0] += fileDataBinChr[j];
                     }else{
-                        i = fileData.length;
-                        break;
+                        tmpHashBlock++;
+                        binEachHashBlock[tmpHashBlock][0] += fileDataBinChr[j];
                     }
                 }
             }
 
-            if (fileDataBinList.size() < totalBits){
-                for (int i = fileDataBinList.size(); i < totalBits; i++) {
-                    fileDataBinList.add('1');
+            while (tmpHashBlock < hashBlock.length - 1){
+                if (binEachHashBlock[tmpHashBlock][0].length() < totalBitsPerBlock){
+                    while (binEachHashBlock[tmpHashBlock][0].length() < totalBitsPerBlock) {
+                        binEachHashBlock[tmpHashBlock][0] += '1';
+                    }
+                }
+                tmpHashBlock++;
+            }
+
+            for (int i = 0; i < hashBlock.length; i++) {
+                BigInteger[] chunks = new BigInteger[5];
+                if (i == 0){
+                    hashBlock[i] = new BigInteger(String.valueOf(fileData.length * 8));
+                }else{
+                    for (int j = 0; j < chunks.length; j++) {
+                        chunks[j] = new BigInteger(binEachHashBlock[i - 1][0].substring((j * size), ((j + 1) * size)), 2);
+                        chunks[j] = project_1_BigInt.FastExpo(chunks[j], new BigInteger(String.valueOf(j + 1)), p);
+                    }
+                    BigInteger sumCi = chunks[0].add(chunks[1]).add(chunks[2]).add(chunks[3]).add(chunks[4]).mod(p);
+                    hashBlock[i] = hashBlock[i - 1].add(sumCi).mod(p);
                 }
             }
 
-            char[] fileDataBinArr = new char[fileDataBinList.size()];
-            for (int i = 0; i < fileDataBinList.size(); i++) {
-                fileDataBinArr[i] = fileDataBinList.get(i);
-            }
-            for (int i = 0; i < hashBlock.length; i++) {
-                if (i == 0){
-                    hashBlock[i] = new BigInteger(String.valueOf(fileData.length * 8));
-                }else {
-                    String C1_str = String.valueOf(fileDataBinArr, ((i - 1) * 5 * size) + 0, size);
-                    String C2_str = String.valueOf(fileDataBinArr, ((i - 1) * 5 * size) + size, size);
-                    String C3_str = String.valueOf(fileDataBinArr, ((i - 1) * 5 * size) + (2 * size), size);
-                    String C4_str = String.valueOf(fileDataBinArr, ((i - 1) * 5 * size) + (3 * size), size);
-                    String C5_str = String.valueOf(fileDataBinArr, ((i - 1) * 5 * size) + (4 * size), size);
-    
-                    BigInteger C1 = new BigInteger(C1_str, 2);
-                    BigInteger C2 = project_1_BigInt.FastExpo(new BigInteger(C2_str, 2), new BigInteger("2"), p);
-                    BigInteger C3 = project_1_BigInt.FastExpo(new BigInteger(C3_str, 3), new BigInteger("2"), p);
-                    BigInteger C4 = project_1_BigInt.FastExpo(new BigInteger(C4_str, 4), new BigInteger("2"), p);
-                    BigInteger C5 = project_1_BigInt.FastExpo(new BigInteger(C5_str, 5), new BigInteger("2"), p);
-    
-                    BigInteger sumCi = C1.add(C2).add(C3).add(C4).add(C5).mod(p);
-                    hashBlock[i] = hashBlock[i - 1].add(sumCi).shiftRight(16).mod(p);
-                }
-            }
             in.close();
+            hashedText = hashBlock[hashBlock.length - 1].toByteArray();
         }catch (IOException e){
             System.out.println(e);
         }
-        byte[] hashedText = hashBlock[4].toByteArray();
         return hashedText;
     }
 

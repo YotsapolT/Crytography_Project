@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -11,6 +14,7 @@ public class Application {
         System.out.println("3. Decryption");
         System.out.println("4. Signature");
         System.out.println("5. Verification");
+        System.out.println("6. Hash");
         System.out.print("Enter a number to choose: ");
         int algorithm = in.nextInt();
 
@@ -30,8 +34,11 @@ public class Application {
             case 5:
                 ElgamalVerifyFile();
                 break;
+            case 6:
+                RWHash();
+                break;
             default:
-                System.out.println("Please enter a number between 1-5");
+                System.out.println("Please enter a number between 1-6");
                 break;
         }
         in.close();
@@ -128,6 +135,38 @@ public class Application {
         String pkFilePath = in.nextLine();
         HashMap<String, BigInteger> PublicKey = readPublicKey(pkFilePath);
         project_3.ElgamalVerifyFile(PublicKey.get("p"), PublicKey.get("g"), PublicKey.get("y"), filePath, signedFilePath);
+    }
+
+    public static void RWHash() {
+        in.nextLine();
+        System.out.print("Enter public/private key's file path to get prime for Hash function: ");
+        String keyFilePath = in.nextLine();
+        HashMap<String, BigInteger> key = null;
+        if (keyFilePath.contains("sk")){
+            key = readPrivateKey(keyFilePath);
+            System.out.println("it's private");
+        }else{
+            key = readPublicKey(keyFilePath);
+            System.out.println("it's public");
+        }
+        System.out.print("Enter file path you want to hash: ");
+        String filePath = in.nextLine();
+        byte[] hashedText = project_3.RWHash(key.get("p"), filePath);
+        File file = new File(filePath);
+        String fileName = file.getName().split("\\.")[0];
+        String outputFileName = "hashed_" + fileName + ".txt";
+        try {
+            FileOutputStream out = new FileOutputStream(outputFileName);
+            char[] hash_chr = new BigInteger(hashedText).toString().toCharArray();
+            for (int i = 0; i < hash_chr.length; i++) {
+                out.write(hash_chr[i]);
+            }
+            System.out.println("Hashing file successfully. Hashed file saved as: " + outputFileName);
+
+            out.close();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
 }
